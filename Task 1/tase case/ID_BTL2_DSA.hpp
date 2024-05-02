@@ -119,18 +119,12 @@ void kDTree::recPreOrderTraversal(Node *temp) const
 
 void kDTree::recPostOrderTraversal(Node *temp) const
 {
-    //* bước 1: xét trường hợp Cây đang rỗng
     if (temp == nullptr)
         return;
 
-    //* bước 2: tìm cây con bên trái
     recPostOrderTraversal(temp->left);
-
-    //* bước 3: tìm cây con bên phải
     recPostOrderTraversal(temp->right);
-
     temp->print();
-    //* vì cơ chế root in cuối cùng
 }
 // main function
 kDTree::kDTree(int k = 2)
