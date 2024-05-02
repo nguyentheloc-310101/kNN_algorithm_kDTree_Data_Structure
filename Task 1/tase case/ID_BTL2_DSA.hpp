@@ -85,14 +85,15 @@ public:
         this->recPostOrderTraversal(this->root);
     }
     void insert(const vector<int> &point)
-    {
+    { // TODO: Not done yet, must compare many cases
         this->root = this->recInsert(this->root, point, 0);
         this->count++;
     }
     void remove(const vector<int> &point);
     bool search(const vector<int> &point);
     void buildTree(const vector<vector<int>> &pointList);
-    /**************************************************************************************************/
+
+    /**********************HELPER FUNCTIONS**********************************************************************/
     Node *recInsert(Node *temp, const vector<int> &point, int level)
     {
         if (temp == nullptr)
