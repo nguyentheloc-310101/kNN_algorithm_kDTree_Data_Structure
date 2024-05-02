@@ -55,7 +55,7 @@ public:
     bool search(const vector<int> &point);
     void buildTree(const vector<vector<int>> &pointList);
 
-    void copy(Node *temp);
+    Node *copy(Node *temp);
     void recInOrderTraversal(Node *temp) const;
     void recPreOrderTraversal(Node *temp) const;
     void recPostOrderTraversal(Node *temp) const;
@@ -75,14 +75,17 @@ int kDTree::recGetTreeHeight(Node *root) const
         return 0;
     return 1 + max(recGetTreeHeight(root->left), recGetTreeHeight(root->right));
 }
-void kDTree::copy(Node *temp)
+Node *kDTree::copy(Node *temp)
 {
     if (temp == nullptr)
-        return;
-    copy(temp->left);
-    copy(temp->right);
-    insert(temp->data);
+        return nullptr;
+
+    Node *newRoot = new Node(temp->data);
+    newRoot->left = copy(temp->left);
+    newRoot->right = copy(temp->right);
+    return newRoot;
 }
+
 void kDTree::recInOrderTraversal(Node *temp) const
 {
     if (temp == nullptr)
@@ -128,6 +131,16 @@ void kDTree::recPostOrderTraversal(Node *temp) const
     temp->print();
 }
 // main function
+const kDTree &kDTree ::operator=(const kDTree &other)
+{
+    if (this != &other)
+    {
+        this->k = other.k;
+        this->count = other.count;
+        this->root = this->copy(other.root);
+    }
+    return *this;
+}
 kDTree::kDTree(int k = 2)
 {
     this->k = 2;
