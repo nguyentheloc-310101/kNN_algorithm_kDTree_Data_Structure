@@ -55,6 +55,7 @@ public:
     bool search(const vector<int> &point);
     void buildTree(const vector<vector<int>> &pointList);
 
+    Node *recInsert(Node *temp, const vector<int> &point, int level);
     Node *copy(Node *temp);
     void recInOrderTraversal(Node *temp) const;
     void recPreOrderTraversal(Node *temp) const;
@@ -94,6 +95,35 @@ void kDTree::recInOrderTraversal(Node *temp) const
     recInOrderTraversal(temp->left);
     temp->print();
     recInOrderTraversal(temp->right);
+}
+Node *kDTree::recInsert(Node *temp, const vector<int> &point, int level)
+{
+    if (temp == nullptr)
+    {
+        temp = new Node(point);
+        return;
+    }
+
+    int dimension = level % k;
+
+    if (point[dimension] < temp->data[dimension])
+    {
+        if (temp->left == nullptr)
+        {
+            temp->left = new Node(point);
+            return;
+        }
+        recInsert(temp->left, point, level + 1);
+    }
+    else
+    {
+        if (temp->right == nullptr)
+        {
+            temp->right = new Node(point);
+            return;
+        }
+        recInsert(temp->right, point, level + 1);
+    }
 }
 
 int kDTree::tree_height(Node *root) const
@@ -151,7 +181,7 @@ kDTree::kDTree(const kDTree &other)
 {
     this->k = other.k;
     this->count = other.count;
-    this->root = other.root;
+    this->root = this->copy(other.root);
 }
 int kDTree::height() const
 {
@@ -171,4 +201,10 @@ void kDTree::preorderTraversal() const
 int kDTree::height() const
 {
     return this->recGetTreeHeight(this->root);
+}
+
+void kDTree::insert(const vector<int> &point)
+{
+    this->root = this->recInsert(this->root, point, 0);
+    this->count++;
 }
