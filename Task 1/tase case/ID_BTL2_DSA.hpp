@@ -61,6 +61,7 @@ public:
     void recPostOrderTraversal(Node *temp) const;
     int recLeafCount(Node *temp) const;
     int tree_height(Node *root) const;
+    int recGetTreeHeight(Node *root) const;
     // void nearestNeighbour(const vector<int> &target, Node *best);
     // void kNearestNeighbour(const vector<int> &target, int k, vector<Node *> &bestList);
 };
@@ -68,12 +69,12 @@ public:
 // Please add more or modify as needed
 
 /***Helper functions***/
-// int heightBTS(Node *root)
-// {
-//     if (root == NULL)
-//         return 0;
-//     return 1 + max(heightBTS(root->left), heightBTS(root->right));
-// }
+int kDTree::recGetTreeHeight(Node *root) const
+{
+    if (root == NULL)
+        return 0;
+    return 1 + max(recGetTreeHeight(root->left), recGetTreeHeight(root->right));
+}
 void kDTree::copy(Node *temp)
 {
     if (temp == nullptr)
@@ -153,3 +154,8 @@ void kDTree::preorderTraversal() const
 {
     this->recPreOrderTraversal(this->root);
 };
+
+int kDTree::height() const
+{
+    return this->recGetTreeHeight(this->root);
+}
