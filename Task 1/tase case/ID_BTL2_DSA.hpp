@@ -68,118 +68,115 @@ public:
     {
         return recGetTreeHeight(this->root);
     }
-    int leafCount() const;
-    void inorderTraversal() const;
-    void preorderTraversal() const;
-    void postorderTraversal() const;
-    void insert(const vector<int> &point);
+    int leafCount() const
+    {
+        return recLeafCount(this->root);
+    }
+    void inorderTraversal() const
+    {
+        this->recInOrderTraversal(this->root);
+    }
+    void preorderTraversal() const
+    {
+        this->recPreOrderTraversal(this->root);
+    }
+    void postorderTraversal() const
+    {
+        this->recPostOrderTraversal(this->root);
+    }
+    void insert(const vector<int> &point)
+    {
+        this->root = this->recInsert(this->root, point, 0);
+        this->count++;
+    }
     void remove(const vector<int> &point);
     bool search(const vector<int> &point);
     void buildTree(const vector<vector<int>> &pointList);
+    /**************************************************************************************************/
+    Node *recInsert(Node *temp, const vector<int> &point, int level)
+    {
+        if (temp == nullptr)
+        {
+            temp = new Node(point);
+            return temp;
+        }
 
-    Node *recInsert(Node *temp, const vector<int> &point, int level);
-    Node *copy(Node *temp);
-    void recInOrderTraversal(Node *temp) const;
-    void recPreOrderTraversal(Node *temp) const;
-    void recPostOrderTraversal(Node *temp) const;
-    int recLeafCount(Node *temp) const;
+        int dimension = level % k;
+
+        if (point[dimension] < temp->data[dimension])
+        {
+            if (temp->left == nullptr)
+            {
+                temp->left = new Node(point);
+                return temp->left;
+            }
+            return recInsert(temp->left, point, level + 1);
+        }
+        else
+        {
+            if (temp->right == nullptr)
+            {
+                temp->right = new Node(point);
+                return temp->right;
+            }
+            return recInsert(temp->right, point, level + 1);
+        }
+    }
+    Node *copy(Node *temp)
+    {
+
+        if (temp == nullptr)
+            return nullptr;
+
+        Node *newRoot = new Node(temp->data);
+        newRoot->left = copy(temp->left);
+        newRoot->right = copy(temp->right);
+        return newRoot;
+    }
+    void recInOrderTraversal(Node *temp) const
+    {
+        if (temp == nullptr)
+            return;
+
+        recInOrderTraversal(temp->left);
+        temp->print();
+        recInOrderTraversal(temp->right);
+    }
+    void recPreOrderTraversal(Node *temp) const
+    {
+        if (temp == nullptr)
+            return;
+        temp->print();
+        recInOrderTraversal(temp->left);
+        recInOrderTraversal(temp->right);
+    }
+    void recPostOrderTraversal(Node *temp) const
+    {
+        if (temp == nullptr)
+            return;
+
+        recPostOrderTraversal(temp->left);
+        recPostOrderTraversal(temp->right);
+        temp->print();
+    }
+    int recLeafCount(Node *temp) const
+    {
+        if (temp == nullptr)
+            return 0;
+
+        if (temp->left == nullptr && temp->right == nullptr)
+            return 1;
+        return recLeafCount(temp->left) + recLeafCount(temp->right);
+    }
     int tree_height(Node *root) const;
-    int recGetTreeHeight(Node *root) const;
+    int recGetTreeHeight(Node *root) const
+    {
+        if (root == NULL)
+            return 0;
+        return 1 + max(recGetTreeHeight(root->left), recGetTreeHeight(root->right));
+    }
     // void nearestNeighbour(const vector<int> &target, Node *best);
     // void kNearestNeighbour(const vector<int> &target, int k, vector<Node *> &bestList);
 };
 
 // Please add more or modify as needed
-
-/***Helper functions***/
-int kDTree::recGetTreeHeight(Node *root) const
-{
-    if (root == NULL)
-        return 0;
-    return 1 + max(recGetTreeHeight(root->left), recGetTreeHeight(root->right));
-}
-Node *kDTree::copy(Node *temp)
-{
-    if (temp == nullptr)
-        return nullptr;
-
-    Node *newRoot = new Node(temp->data);
-    newRoot->left = copy(temp->left);
-    newRoot->right = copy(temp->right);
-    return newRoot;
-}
-
-void kDTree::recInOrderTraversal(Node *temp) const
-{
-    if (temp == nullptr)
-        return;
-
-    recInOrderTraversal(temp->left);
-    temp->print();
-    recInOrderTraversal(temp->right);
-}
-Node *kDTree::recInsert(Node *temp, const vector<int> &point, int level)
-{
-    if (temp == nullptr)
-    {
-        temp = new Node(point);
-        return temp;
-    }
-
-    int dimension = level % k;
-
-    if (point[dimension] < temp->data[dimension])
-    {
-        if (temp->left == nullptr)
-        {
-            temp->left = new Node(point);
-            return temp->left;
-        }
-        return recInsert(temp->left, point, level + 1);
-    }
-    else
-    {
-        if (temp->right == nullptr)
-        {
-            temp->right = new Node(point);
-            return temp->right;
-        }
-        return recInsert(temp->right, point, level + 1);
-    }
-}
-
-void kDTree::recPreOrderTraversal(Node *temp) const
-{
-    if (temp == nullptr)
-        return;
-    temp->print();
-    recInOrderTraversal(temp->left);
-    recInOrderTraversal(temp->right);
-}
-
-void kDTree::recPostOrderTraversal(Node *temp) const
-{
-    if (temp == nullptr)
-        return;
-
-    recPostOrderTraversal(temp->left);
-    recPostOrderTraversal(temp->right);
-    temp->print();
-}
-// main function
-
-void kDTree::inorderTraversal() const
-{
-    this->recInOrderTraversal(this->root);
-};
-
-void kDTree::preorderTraversal() const
-{
-    this->recPreOrderTraversal(this->root);
-};
-
-void kDTree::insert(const vector<int> &point)
-{
-    this->root = this->recInsert(this->root, point, 0);
-    this->count++;
-}
