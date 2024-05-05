@@ -51,8 +51,12 @@ public:
     void preorderTraversal() const;
     void postorderTraversal() const;
     void insert(const vector<int> &point);
+    Node *insert(Node *root, const vector<int> &point, int level);
     void remove(const vector<int> &point);
+    void remove(Node *root, const vector<int> &point, int level);
+    Node *findSmallest(Node *root);
     bool search(const vector<int> &point);
+    bool search(Node *root, const vector<int> &point, int level);
     void buildTree(const vector<vector<int>> &pointList);
 
     void copy(Node *temp);
@@ -159,3 +163,129 @@ void kDTree::preorderTraversal() const
 {
     this->recPreOrderTraversal(this->root);
 };
+
+void kDTree::insert(const vector<int> &point)
+{
+    this->root = this->insert(root, point, 0);
+    this->count++;
+}
+
+Node *kDTree::insert(Node *root, const vector<int> &point, int level)
+{
+    if (root == nullptr)
+    {
+        return new Node(point);
+    }
+
+    int alpha = level % this->k;
+
+    if (alpha == 0)
+    {
+        if (point[0] > root->data[0])
+        {
+            root->right = insert(root->right, point, alpha);
+        }
+        else if (point[0] < root->data[0])
+        {
+            root->left = insert(root->left, point, alpha);
+        }
+    }
+    else if (alpha == 1)
+    {
+        if (point[1] > root->data[1])
+        {
+            root->right = insert(root->right, point, alpha);
+        }
+        else if (point[1] < root->data[1])
+        {
+            root->left = insert(root->left, point, alpha);
+        }
+    }
+
+    return root;
+}
+
+void kDTree::remove(const vector<int> &point)
+{
+    return this->remove(root, point, 0);
+}
+
+Node *kDTree::findSmallest(Node *root)
+{
+    Node* temp = root;
+    while (temp->left != nullptr)
+    {
+        temp = temp->left;
+    }
+    return temp;
+}
+
+void kDTree::remove(Node *root, const vector<int> &point, int level)
+{
+    if (root == nullptr)
+        return;
+
+    int alpha = level % k;
+
+    if (alpha == 0)
+    {
+        if (point[0] > root->data[0])
+            remove(root->right, point, alpha);
+        else if (point[0] < root->data[0])
+            remove(root->left, point, alpha);
+        else if (point[0] == root->data[0])
+        {
+            if (root->left == nullptr && root->right == nullptr)
+            {
+                delete root;
+                return;
+            }
+            else if (root->right != nullptr)
+            {
+                
+            }
+        }
+    }
+    else if (alpha == 1)
+    {
+        if (point[1] > root->data[1])
+            remove(root->right, point, alpha);
+        else if (point[1] < root->data[1])
+            remove(root->left, point, alpha);
+        else if (point[1] == root->data[1])
+        {
+        }
+    }
+}
+
+bool kDTree::search(const vector<int> &point)
+{
+    return this->search(root, point, 0);
+}
+
+bool kDTree::search(Node *root, const vector<int> &point, int level)
+{
+    if (root == nullptr)
+        return false;
+
+    int alpha = level % k;
+
+    if (alpha == 0)
+    {
+        if (point[0] > root->data[0])
+            search(root->right, point, alpha);
+        else if (point[0] < root->data[0])
+            search(root->left, point, alpha);
+        else if (point[0] == root->data[0])
+            return true;
+    }
+    else if (alpha == 1)
+    {
+        if (point[1] > root->data[1])
+            search(root->right, point, alpha);
+        else if (point[1] < root->data[1])
+            search(root->left, point, alpha);
+        else if (point[1] == root->data[1])
+            return true;
+    }
+}
