@@ -13,7 +13,9 @@ void kDTree::copy(Node *temp)
 void kDTree::recInOrderTraversal(Node *temp) const
 {
     if (temp == nullptr)
+    {
         return;
+    }
 
     recInOrderTraversal(temp->left);
     temp->print();
@@ -26,22 +28,24 @@ int kDTree::tree_height(Node *root) const
         return 0;
     else
     {
-
         int left_height = tree_height(root->left);
         int right_height = tree_height(root->right);
-        if (left_height >= right_height)
-            return left_height + 1;
-        else
-            return right_height + 1;
+        return max(left_height, right_height) + 1;
+        // if (left_height >= right_height)
+        //     return left_height + 1;
+        // else
+        //     return right_height + 1;
     }
 }
 void kDTree::recPreOrderTraversal(Node *temp) const
 {
     if (temp == nullptr)
+    {
         return;
+    }
     temp->print();
-    recInOrderTraversal(temp->left);
-    recInOrderTraversal(temp->right);
+    recPreOrderTraversal(temp->left);
+    recPreOrderTraversal(temp->right);
 }
 void kDTree::recPostOrderTraversal(Node *temp) const
 {
@@ -57,6 +61,27 @@ void kDTree::recPostOrderTraversal(Node *temp) const
 
     temp->print();
     //* vì cơ chế root in cuối cùng
+}
+int kDTree::nodeCount() const
+{
+    return this->count;
+}
+int kDTree::leafCount() const
+{
+    return this->recLeafCount(this->root);
+}
+int kDTree::recLeafCount(Node *temp) const
+{
+    if (temp == nullptr)
+    {
+        return 0;
+    }
+    if (!temp->left && !temp->right)
+    {
+        return 1;
+    }
+
+    return recLeafCount(temp->left) + recLeafCount(temp->right);
 }
 // main function
 kDTree::kDTree(int k)
@@ -86,14 +111,29 @@ void kDTree::preorderTraversal() const
     this->recPreOrderTraversal(this->root);
 };
 
+void kDTree::postorderTraversal() const
+{
+    this->recPostOrderTraversal(this->root);
+}
+
 void kDTree::insert(const vector<int> &point)
 {
+    if (point.size() > k)
+    {
+        return;
+    }
     this->root = this->insert(root, point, 0);
     this->count++;
 }
 
 Node *kDTree::insert(Node *root, const vector<int> &point, int level)
 {
+    // for (int i = 0; i < point.size(); i++)
+    // {
+    //     cout << point[i] << " ";
+    // }
+    // cout << endl;
+
     if (root == nullptr)
     {
         return new Node(point);
@@ -101,27 +141,13 @@ Node *kDTree::insert(Node *root, const vector<int> &point, int level)
 
     int alpha = level % this->k;
 
-    if (alpha == 0)
+    if (point[alpha] >= root->data[alpha])
     {
-        if (point[0] > root->data[0])
-        {
-            root->right = insert(root->right, point, level + 1);
-        }
-        else if (point[0] < root->data[0])
-        {
-            root->left = insert(root->left, point, level + 1);
-        }
+        root->right = insert(root->right, point, level + 1);
     }
-    else if (alpha == 1)
+    else if (point[alpha] < root->data[alpha])
     {
-        if (point[1] > root->data[1])
-        {
-            root->right = insert(root->right, point, level + 1);
-        }
-        else if (point[1] < root->data[1])
-        {
-            root->left = insert(root->left, point, level + 1);
-        }
+        root->left = insert(root->left, point, level + 1);
     }
 
     return root;
@@ -129,70 +155,157 @@ Node *kDTree::insert(Node *root, const vector<int> &point, int level)
 
 void kDTree::remove(const vector<int> &point)
 {
-    return this->remove(root, point, 0);
+    this->root = this->remove(root, point, 0);
 }
 
-void kDTree::remove(Node *root, const vector<int> &point, int level)
+Node *kDTree::remove(Node *root, const vector<int> &point, int level)
 {
+    // cout << "point: " << point[0] << ":" << point[1] << " root: " << root->data[0] << ":" << root->data[1] << endl;
     if (root == nullptr)
-        return;
+        return nullptr;
 
     int alpha = level % k;
 
-    if (alpha == 0)
+    // cout << "\nalpha: " << alpha << endl;
+    // if (point[0] == 10 && point[1] == 1)
+    //     cout << "aaaaa\n";
+    // if (root->data[0] == 10 && root->data[1] == 1)
+    //     cout << "cuong\n";
+
+    if (point[alpha] >= root->data[alpha] && point != root->data)
     {
-        if (point[0] > root->data[0])
-            remove(root->right, point, level + 1);
-        else if (point[0] < root->data[0])
-            remove(root->left, point, level + 1);
-        else if (point[0] == root->data[0])
+        root->right = remove(root->right, point, level + 1);
+    }
+    else if (point[alpha] < root->data[alpha])
+    {
+        root->left = remove(root->left, point, level + 1);
+    }
+    else if (point == root->data)
+    {
+        if (root->left == nullptr && root->right == nullptr)
         {
-            if (root->left == nullptr && root->right == nullptr)
-            {
-                delete root;
-                return;
-            }
-            else if (root->right != nullptr)
-            {
-                root->data = root->right->data;
-                remove(root->right, root->data, level + 1);
-            }
-            else if (root->right == nullptr && root->left != nullptr)
-            {
-                root->data = root->left->data;
-                remove(root->left, root->data, level + 1);
-            }
+            // cout << "\nhere: " << root->data[0] << ":" << root->data[1] << " ";
+            delete root;
+            // cout << "\nhere: " << root->data[0] << " ";
+            this->count--;
+            return nullptr;
+        }
+        else if (root->right != nullptr)
+        {
+            // cout << "here\n";
+            Node *temp = findMinValue(root->right, level + 1, alpha);
+            // cout << "current: " << root->data[0] << endl;
+            root->data = temp->data;
+            // cout << "Temp: " << temp->data[0] << ":" << temp->data[1] << endl;
+            // cout << "after: " << root->data[0] << endl;
+            // root->print();
+
+            root->right = remove(root->right, temp->data, level + 1);
+            // root->print();
+        }
+        else if (root->right == nullptr && root->left != nullptr)
+        {
+            Node *temp = findMinValue(root->left, level + 1, alpha);
+            root->data = temp->data;
+
+            Node *temp1 = root->left;
+            root->right = temp1;
+            root->left = nullptr;
+
+            root->right = remove(root->right, temp->data, level + 1);
         }
     }
-    else if (alpha == 1)
+    return root;
+}
+
+Node *kDTree::findMinValue(Node *root, int level, int alpha)
+{
+    if (root == nullptr)
     {
-        if (point[1] > root->data[1])
-            remove(root->right, point, level + 1);
-        else if (point[1] < root->data[1])
-            remove(root->left, point, level + 1);
-        else if (point[1] == root->data[1])
+        return nullptr;
+    }
+    int alpha_node = level % k;
+
+    if (alpha == alpha_node)
+    {
+        if (root->left == nullptr)
         {
-            if (root->left == nullptr && root->right == nullptr)
-            {
-                delete root;
-                return;
-            }
-            else if (root->right != nullptr)
-            {
-                root->data = root->right->data;
-                remove(root->right, root->data, level + 1);
-            }
-            else if (root->right == nullptr && root->left != nullptr)
-            {
-                root->data = root->left->data;
-                remove(root->left, root->data, level + 1);
-            }
+            // cout << "\nroot: " << root->data[0] << endl;
+            return root;
+        }
+        else
+        {
+            return findMinValue(root->left, level + 1, alpha);
+            // return temp;
         }
     }
+    else
+    {
+        // cout << "here: " << root->data[0] << ":" << root->data[1] << " alpha: " << alpha << endl;
+        Node *left = findMinValue(root->left, level + 1, alpha);
+        // cout << "here" << endl;
+        Node *right = findMinValue(root->right, level + 1, alpha);
+        // cout << "here" << endl;
+        Node *node = root;
+
+        if (!left && !right)
+        {
+            return node;
+        }
+        if (left && right)
+        {
+            if (left->data[alpha] < node->data[alpha] && left->data[alpha] < right->data[alpha])
+            {
+                return left;
+            }
+            else if (right->data[alpha] < node->data[alpha] && right->data[alpha] < left->data[alpha])
+            {
+                return right;
+            }
+        }
+        if (left && !right)
+        {
+            if (left->data[alpha] == node->data[alpha])
+            {
+                // cout << "here" << endl;
+                return node;
+            }
+            // cout << "here" << endl;
+            return left->data[alpha] < node->data[alpha] ? left : node;
+        }
+        if (left && right)
+        {
+            if (left->data[alpha] == node->data[alpha] || right->data[alpha] == node->data[alpha])
+            {
+                // cout << "here" << endl;
+                return node;
+            }
+            else if (left->data[alpha] == right->data[alpha])
+            {
+                return left;
+            }
+            if (left->data[alpha] < right->data[alpha] && left->data[alpha] < root->data[alpha])
+                return left;
+            else if (right->data[alpha] < left->data[alpha] && right->data[alpha] < root->data[alpha])
+                return right;
+            else
+                return node;
+        }
+        if (right && !left)
+        {
+            if (right->data[alpha] == node->data[alpha])
+            {
+                return node;
+            }
+            return right->data[alpha] < node->data[alpha] ? right : node;
+        }
+    }
+    return root;
 }
 
 bool kDTree::search(const vector<int> &point)
 {
+    // cout << this->search(root, point, 0) << endl;
     return this->search(root, point, 0);
 }
 
@@ -203,26 +316,16 @@ bool kDTree::search(Node *root, const vector<int> &point, int level)
 
     int alpha = level % k;
 
-    if (alpha == 0)
+    if (point == root->data)
     {
-        if (point[0] > root->data[0])
-            search(root->right, point, level + 1);
-        else if (point[0] < root->data[0])
-            search(root->left, point, level + 1);
-        else if (point[0] == root->data[0])
-            return true;
-    }
-    else if (alpha == 1)
-    {
-        if (point[1] > root->data[1])
-            search(root->right, point, level + 1);
-        else if (point[1] < root->data[1])
-            search(root->left, point, level + 1);
-        else if (point[1] == root->data[1])
-            return true;
+        // cout << "SEARCH: " << root->data[0] << "-----" << point[0] << endl;
+        return true;
     }
 
-    return false;
+    if (point[alpha] >= root->data[alpha] && point != root->data)
+        return search(root->right, point, level + 1);
+    else if (point[alpha] < root->data[alpha])
+        return search(root->left, point, level + 1);
 }
 
 void kDTree::buildTree(const vector<vector<int>> &pointList)
@@ -232,31 +335,89 @@ void kDTree::buildTree(const vector<vector<int>> &pointList)
 
 Node *kDTree::buildTree(const vector<vector<int>> &pointList, int level)
 {
-    vector<vector<int>> sortedPoints(pointList);
-
-    if (pointList.empty())
+    int size = pointList.size();
+    if (size == 0)
     {
-        return this->root;
+        return nullptr;
+    }
+    else if (size == 1)
+    {
+        this->count++;
+        return new Node(pointList[0]);
+    }
+    else
+    {
+        // sort the pointList using merge sort
+        vector<vector<int>> sortedPointList = mergeSort(pointList, level % k);
+
+        // find the median index
+        int medianIndex = (size - 1) / 2;
+
+        // create a new node with the median point as its data
+        Node *node = new Node(sortedPointList[medianIndex]);
+
+        // split the pointList into left and right sublists
+        vector<vector<int>> left(sortedPointList.begin(), sortedPointList.begin() + medianIndex);
+        vector<vector<int>> right(sortedPointList.begin() + medianIndex + 1, sortedPointList.end());
+
+        // recursively build the left and right subtrees
+        node->left = buildTree(left, level + 1);
+        node->right = buildTree(right, level + 1);
+
+        this->count++;
+        return node;
+    }
+}
+
+vector<vector<int>> kDTree::mergeSort(const vector<vector<int>> &arr, int alpha)
+{
+    if (arr.size() <= 1)
+    {
+        return arr;
     }
 
-    int alpha = level % k;
+    int mid = arr.size() / 2;
 
-    sort(pointList.begin(), pointList.end(), [alpha](const vector<int> &a, const vector<int> &b)
-         { return a[alpha] < b[alpha]; });
+    vector<vector<int>> left(arr.begin(), arr.begin() + mid);
+    vector<vector<int>> right(arr.begin() + mid, arr.end());
 
-    int median = (pointList.size() - 1) / 2;
+    left = mergeSort(left, alpha);
+    right = mergeSort(right, alpha);
 
-    this->insert(pointList[median]);
+    return merge(left, right, alpha);
+}
 
-    sortedPoints.erase(sortedPoints.begin() + median);
+vector<vector<int>> kDTree::merge(vector<vector<int>> &left, vector<vector<int>> &right, int alpha)
+{
+    vector<vector<int>> result;
 
-    vector<vector<int>> leftPoints(sortedPoints.begin(), sortedPoints.begin() + median);
-    vector<vector<int>> rightPoints(sortedPoints.begin() + median + 1, sortedPoints.end());
+    while (!left.empty() && !right.empty())
+    {
+        if (left[0][alpha] <= right[0][alpha])
+        {
+            result.push_back(left[0]);
+            left.erase(left.begin());
+        }
+        else
+        {
+            result.push_back(right[0]);
+            right.erase(right.begin());
+        }
+    }
 
-    root->left = buildTree(leftPoints, level + 1);
-    root->right = buildTree(rightPoints, level + 1);
+    while (!left.empty())
+    {
+        result.push_back(left[0]);
+        left.erase(left.begin());
+    }
 
-    return this->root;
+    while (!right.empty())
+    {
+        result.push_back(right[0]);
+        right.erase(right.begin());
+    }
+
+    return result;
 }
 
 bool compareAsDim(vector<int> i1, vector<int> i2, int alpha)

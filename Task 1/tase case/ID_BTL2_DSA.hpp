@@ -26,7 +26,7 @@ struct Node
             else
                 OUTPUT << ",";
         }
-        OUTPUT << "\n";
+        OUTPUT << " ";
     }
 };
 
@@ -41,7 +41,7 @@ private:
     // hàm phụ nếu cần
 public:
     kDTree(int k = 2);
-    ~kDTree();
+    // ~kDTree();
     const kDTree &operator=(const kDTree &other);
     kDTree(const kDTree &other);
     int nodeCount() const;
@@ -53,7 +53,8 @@ public:
     void insert(const vector<int> &point);
     Node *insert(Node *root, const vector<int> &point, int level);
     void remove(const vector<int> &point);
-    void remove(Node *root, const vector<int> &point, int level);
+    Node *remove(Node *root, const vector<int> &point, int level);
+    Node *findMinValue(Node *root, int level, int alpha);
     bool search(const vector<int> &point);
     bool search(Node *root, const vector<int> &point, int level);
     void buildTree(const vector<vector<int>> &pointList);
@@ -65,6 +66,8 @@ public:
     void recPostOrderTraversal(Node *temp) const;
     int recLeafCount(Node *temp) const;
     int tree_height(Node *root) const;
+    vector<vector<int>> mergeSort(const vector<vector<int>> &arr, int alpha);
+    vector<vector<int>> merge(vector<vector<int>> &left, vector<vector<int>> &right, int alpha);
     // void nearestNeighbour(const vector<int> &target, Node *best);
     // void kNearestNeighbour(const vector<int> &target, int k, vector<Node *> &bestList);
 };
