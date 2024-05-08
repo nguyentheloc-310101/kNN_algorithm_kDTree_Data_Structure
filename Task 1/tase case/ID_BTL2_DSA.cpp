@@ -184,9 +184,7 @@ Node *kDTree::remove(Node *root, const vector<int> &point, int level)
     {
         if (root->left == nullptr && root->right == nullptr)
         {
-            // cout << "\nhere: " << root->data[0] << ":" << root->data[1] << " ";
             delete root;
-            // cout << "\nhere: " << root->data[0] << " ";
             this->count--;
             return nullptr;
         }
@@ -195,6 +193,15 @@ Node *kDTree::remove(Node *root, const vector<int> &point, int level)
             // cout << "here\n";
             Node *temp = findMinValue(root->right, level + 1, alpha);
             // cout << "current: " << root->data[0] << endl;
+            vector<int> check;
+            check.push_back(8);
+            check.push_back(2);
+            check.push_back(6);
+            if (root->data == check)
+            {
+                cout << "\n(8,2,6)\n";
+                cout << "Temp: " << temp->data[0] << ":" << temp->data[1] << ":" << temp->data[2] << endl;
+            }
             root->data = temp->data;
             // cout << "Temp: " << temp->data[0] << ":" << temp->data[1] << endl;
             // cout << "after: " << root->data[0] << endl;
@@ -258,10 +265,26 @@ Node *kDTree::findMinValue(Node *root, int level, int alpha)
             {
                 return left;
             }
-            else if (right->data[alpha] < node->data[alpha] && right->data[alpha] < left->data[alpha])
+            if (right->data[alpha] < node->data[alpha] && right->data[alpha] < left->data[alpha])
             {
                 return right;
             }
+            if (left->data[alpha] == node->data[alpha] || right->data[alpha] == node->data[alpha])
+            {
+                // cout << "here" << endl;
+                return node;
+            }
+            if (left->data[alpha] == right->data[alpha])
+            {
+                return left;
+            }
+            // if (left->data[alpha] < right->data[alpha] && left->data[alpha] < root->data[alpha])
+            //     return left;
+            // else if (right->data[alpha] < left->data[alpha] && right->data[alpha] < root->data[alpha])
+            //     return right;
+
+            return node;
+            // return node;
         }
         if (left && !right)
         {
@@ -272,24 +295,6 @@ Node *kDTree::findMinValue(Node *root, int level, int alpha)
             }
             // cout << "here" << endl;
             return left->data[alpha] < node->data[alpha] ? left : node;
-        }
-        if (left && right)
-        {
-            if (left->data[alpha] == node->data[alpha] || right->data[alpha] == node->data[alpha])
-            {
-                // cout << "here" << endl;
-                return node;
-            }
-            else if (left->data[alpha] == right->data[alpha])
-            {
-                return left;
-            }
-            if (left->data[alpha] < right->data[alpha] && left->data[alpha] < root->data[alpha])
-                return left;
-            else if (right->data[alpha] < left->data[alpha] && right->data[alpha] < root->data[alpha])
-                return right;
-            else
-                return node;
         }
         if (right && !left)
         {
