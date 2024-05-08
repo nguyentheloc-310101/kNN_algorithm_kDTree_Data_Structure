@@ -126,31 +126,26 @@ void kDTree::insert(const vector<int> &point)
     this->count++;
 }
 
-Node *kDTree::insert(Node *root, const vector<int> &point, int level)
+Node *kDTree::insert(Node *temp, const vector<int> &point, int level)
 {
-    // for (int i = 0; i < point.size(); i++)
-    // {
-    //     cout << point[i] << " ";
-    // }
-    // cout << endl;
 
-    if (root == nullptr)
+    if (temp == nullptr)
     {
         return new Node(point);
     }
 
     int alpha = level % this->k;
 
-    if (point[alpha] >= root->data[alpha])
+    if (point[alpha] >= temp->data[alpha])
     {
-        root->right = insert(root->right, point, level + 1);
+        temp->right = insert(temp->right, point, level + 1);
     }
-    else if (point[alpha] < root->data[alpha])
+    else if (point[alpha] < temp->data[alpha])
     {
-        root->left = insert(root->left, point, level + 1);
+        temp->left = insert(temp->left, point, level + 1);
     }
 
-    return root;
+    return temp;
 }
 
 void kDTree::remove(const vector<int> &point)
@@ -160,17 +155,10 @@ void kDTree::remove(const vector<int> &point)
 
 Node *kDTree::remove(Node *root, const vector<int> &point, int level)
 {
-    // cout << "point: " << point[0] << ":" << point[1] << " root: " << root->data[0] << ":" << root->data[1] << endl;
     if (root == nullptr)
         return nullptr;
 
     int alpha = level % k;
-
-    // cout << "\nalpha: " << alpha << endl;
-    // if (point[0] == 10 && point[1] == 1)
-    //     cout << "aaaaa\n";
-    // if (root->data[0] == 10 && root->data[1] == 1)
-    //     cout << "cuong\n";
 
     if (point[alpha] >= root->data[alpha] && point != root->data)
     {
@@ -184,24 +172,15 @@ Node *kDTree::remove(Node *root, const vector<int> &point, int level)
     {
         if (root->left == nullptr && root->right == nullptr)
         {
-            // cout << "\nhere: " << root->data[0] << ":" << root->data[1] << " ";
             delete root;
-            // cout << "\nhere: " << root->data[0] << " ";
             this->count--;
             return nullptr;
         }
         else if (root->right != nullptr)
         {
-            // cout << "here\n";
             Node *temp = findMinValue(root->right, level + 1, alpha);
-            // cout << "current: " << root->data[0] << endl;
             root->data = temp->data;
-            // cout << "Temp: " << temp->data[0] << ":" << temp->data[1] << endl;
-            // cout << "after: " << root->data[0] << endl;
-            // root->print();
-
             root->right = remove(root->right, temp->data, level + 1);
-            // root->print();
         }
         else if (root->right == nullptr && root->left != nullptr)
         {
@@ -218,97 +197,133 @@ Node *kDTree::remove(Node *root, const vector<int> &point, int level)
     return root;
 }
 
+// Node *kDTree::findMinValue(Node *root, int level, int alpha)
+// {
+//     if (root == nullptr)
+//     {
+//         return nullptr;
+//     }
+//     int alpha_node = level % k;
+
+//     if (alpha == alpha_node)
+//     {
+//         if (root->left == nullptr)
+//         {
+//             // cout << "\nroot: " << root->data[0] << endl;
+//             return root;
+//         }
+//         else
+//         {
+//             return findMinValue(root->left, level + 1, alpha);
+//             // return temp;
+//         }
+//     }
+//     else
+//     {
+//         // cout << "here: " << root->data[0] << ":" << root->data[1] << " alpha: " << alpha << endl;
+//         Node *left = findMinValue(root->left, level + 1, alpha);
+//         // cout << "here" << endl;
+//         Node *right = findMinValue(root->right, level + 1, alpha);
+//         // cout << "here" << endl;
+//         Node *node = root;
+
+//         if (!left && !right)
+//         {
+//             return node;
+//         }
+//         if (left && right)
+//         {
+//             if (left->data[alpha] < node->data[alpha] && left->data[alpha] < right->data[alpha])
+//             {
+//                 return left;
+//             }
+//             else if (right->data[alpha] < node->data[alpha] && right->data[alpha] < left->data[alpha])
+//             {
+//                 return right;
+//             }
+//         }
+//         if (left && !right)
+//         {
+//             if (left->data[alpha] == node->data[alpha])
+//             {
+//                 // cout << "here" << endl;
+//                 return node;
+//             }
+//             // cout << "here" << endl;
+//             return left->data[alpha] < node->data[alpha] ? left : node;
+//         }
+//         if (left && right)
+//         {
+//             if (left->data[alpha] == node->data[alpha] || right->data[alpha] == node->data[alpha])
+//             {
+//                 // cout << "here" << endl;
+//                 return node;
+//             }
+//             else if (left->data[alpha] == right->data[alpha])
+//             {
+//                 return left;
+//             }
+//             if (left->data[alpha] < right->data[alpha] && left->data[alpha] < root->data[alpha])
+//                 return left;
+//             else if (right->data[alpha] < left->data[alpha] && right->data[alpha] < root->data[alpha])
+//                 return right;
+//             else
+//                 return node;
+//         }
+//         if (right && !left)
+//         {
+//             if (right->data[alpha] == node->data[alpha])
+//             {
+//                 return node;
+//             }
+//             return right->data[alpha] < node->data[alpha] ? right : node;
+//         }
+//     }
+//     return root;
+// }
 Node *kDTree::findMinValue(Node *root, int level, int alpha)
 {
     if (root == nullptr)
     {
         return nullptr;
     }
-    int alpha_node = level % k;
 
-    if (alpha == alpha_node)
+    int current_alpha = level % k;
+
+    if (current_alpha == alpha)
     {
-        if (root->left == nullptr)
+        if (root->left != nullptr)
         {
-            // cout << "\nroot: " << root->data[0] << endl;
-            return root;
+            return findMinValue(root->left, level + 1, alpha);
         }
         else
         {
-            return findMinValue(root->left, level + 1, alpha);
-            // return temp;
+            return root;
         }
     }
     else
     {
-        // cout << "here: " << root->data[0] << ":" << root->data[1] << " alpha: " << alpha << endl;
-        Node *left = findMinValue(root->left, level + 1, alpha);
-        // cout << "here" << endl;
-        Node *right = findMinValue(root->right, level + 1, alpha);
-        // cout << "here" << endl;
-        Node *node = root;
+        Node *min_left = findMinValue(root->left, level + 1, alpha);
+        Node *min_right = findMinValue(root->right, level + 1, alpha);
 
-        if (!left && !right)
+        Node *min_node = root;
+        if (min_left != nullptr && min_left->data[alpha] < min_node->data[alpha])
         {
-            return node;
+            min_node = min_left;
         }
-        if (left && right)
+        if (min_right != nullptr && min_right->data[alpha] < min_node->data[alpha])
         {
-            if (left->data[alpha] < node->data[alpha] && left->data[alpha] < right->data[alpha])
-            {
-                return left;
-            }
-            else if (right->data[alpha] < node->data[alpha] && right->data[alpha] < left->data[alpha])
-            {
-                return right;
-            }
+            min_node = min_right;
         }
-        if (left && !right)
-        {
-            if (left->data[alpha] == node->data[alpha])
-            {
-                // cout << "here" << endl;
-                return node;
-            }
-            // cout << "here" << endl;
-            return left->data[alpha] < node->data[alpha] ? left : node;
-        }
-        if (left && right)
-        {
-            if (left->data[alpha] == node->data[alpha] || right->data[alpha] == node->data[alpha])
-            {
-                // cout << "here" << endl;
-                return node;
-            }
-            else if (left->data[alpha] == right->data[alpha])
-            {
-                return left;
-            }
-            if (left->data[alpha] < right->data[alpha] && left->data[alpha] < root->data[alpha])
-                return left;
-            else if (right->data[alpha] < left->data[alpha] && right->data[alpha] < root->data[alpha])
-                return right;
-            else
-                return node;
-        }
-        if (right && !left)
-        {
-            if (right->data[alpha] == node->data[alpha])
-            {
-                return node;
-            }
-            return right->data[alpha] < node->data[alpha] ? right : node;
-        }
+        return min_node;
     }
-    return root;
 }
 
 bool kDTree::search(const vector<int> &point)
 {
     // cout << this->search(root, point, 0) << endl;
-    return this->search(root, point, 0);
+    return search(root, point, 0);
 }
-
 bool kDTree::search(Node *root, const vector<int> &point, int level)
 {
     if (root == nullptr)
@@ -318,7 +333,6 @@ bool kDTree::search(Node *root, const vector<int> &point, int level)
 
     if (point == root->data)
     {
-        // cout << "SEARCH: " << root->data[0] << "-----" << point[0] << endl;
         return true;
     }
 
@@ -326,6 +340,9 @@ bool kDTree::search(Node *root, const vector<int> &point, int level)
         return search(root->right, point, level + 1);
     else if (point[alpha] < root->data[alpha])
         return search(root->left, point, level + 1);
+
+    // Ensure a default return statement is present
+    return false;
 }
 
 void kDTree::buildTree(const vector<vector<int>> &pointList)
